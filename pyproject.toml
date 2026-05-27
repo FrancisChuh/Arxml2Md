@@ -1,0 +1,20 @@
+[project]
+name = "arxml-to-markdown"
+version = "0.1.0"
+description = "Convert AUTOSAR ARXML into markdown headings for markmap."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "xmltodict>=0.14.2",
+]
+
+[project.scripts]
+arxml-to-markdown = "arxml_parsey:main"
+arxml-picker-ui = "arxml_picker_ui:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["arxml_parsey", "arxml_picker_ui"]

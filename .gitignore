@@ -1,0 +1,11 @@
+.venv/
+build/
+dist/
+__pycache__/
+*.egg-info/
+*.log
+*.spec
+
+# Generated markdown outputs
+*.md
+!README.md
