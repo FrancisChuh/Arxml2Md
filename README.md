@@ -28,6 +28,18 @@ uv run arxml-to-markdown .\mcu.arxml .\mcu.md
 uv run arxml-picker-ui
 ```
 
+### 打包为 EXE（Windows）
+
+```powershell
+uv run --with pyinstaller pyinstaller --noconfirm --clean --onefile --windowed --name ArxmlPickerUI arxml_picker_ui.py
+```
+
+生成文件：
+
+```text
+.\dist\ArxmlPickerUI.exe
+```
+
 操作步骤：
 
 1. 点击 **Browse...** 选择 `.arxml` 文件
@@ -73,6 +85,18 @@ uv run arxml-to-markdown .\mcu.arxml .\mcu.md
 
 ```powershell
 uv run arxml-picker-ui
+```
+
+### Package as EXE (Windows)
+
+```powershell
+uv run --with pyinstaller pyinstaller --noconfirm --clean --onefile --windowed --name ArxmlPickerUI arxml_picker_ui.py
+```
+
+Output:
+
+```text
+.\dist\ArxmlPickerUI.exe
 ```
 
 Steps:
