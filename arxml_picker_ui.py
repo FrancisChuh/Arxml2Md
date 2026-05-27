@@ -7,62 +7,68 @@ from xml.parsers.expat import ExpatError
 import tkinter as tk
 from tkinter import filedialog, ttk
 
-from arxml_parsey import arxml_to_markdown
+from arxml_parsey import NoExtractableNodesError, UnsupportedInputFormatError, input_to_markdown
 
 
 TRANSLATIONS = {
     "English": {
-        "window_title": "ARXML File Picker",
-        "title": "ARXML to Markdown",
-        "subtitle": "Choose an ARXML file and generate a markmap-ready Markdown outline.",
+        "window_title": "ARXML/DBC File Picker",
+        "title": "ARXML/DBC to Markdown",
+        "subtitle": "Choose an ARXML or DBC file and generate a markmap-ready Markdown outline.",
         "language_label": "Language:",
         "preview_title": "File preview",
         "input_file_label": "Input file:",
         "output_file_label": "Output file:",
-        "arxml_path_label": "ARXML file path:",
+        "arxml_path_label": "ARXML/DBC file path:",
         "output_path_label": "Output Markdown path:",
         "browse": "Browse...",
         "choose_output": "Browse...",
         "generate": "Generate",
         "open_output": "Open output folder",
-        "browse_title": "Select an ARXML file",
+        "browse_title": "Select an ARXML or DBC file",
         "save_title": "Select output Markdown file",
         "arxml_files": "ARXML files",
+        "dbc_files": "DBC files",
+        "supported_files": "Supported files",
         "markdown_files": "Markdown files",
         "all_files": "All files",
         "file_selected": "File selected. Click Generate to create Markdown.",
-        "select_first": "Please select an ARXML file first.",
+        "select_first": "Please select an ARXML or DBC file first.",
         "input_missing": "Input file does not exist.",
-        "parse_failed": "Failed to parse the ARXML file. Please check the file format.",
-        "no_nodes": "No extractable hierarchy nodes were found in the ARXML file, so Markdown cannot be generated.",
+        "parse_failed": "Failed to parse the input file. Please check the file format.",
+        "unsupported_format": "Unsupported file format. Please select a .arxml or .dbc file.",
+        "no_nodes": "No extractable hierarchy nodes were found in the input file, so Markdown cannot be generated.",
         "read_write_error": "File read/write error: {error}",
         "success": "Markdown generated successfully.",
         "open_output_missing": "Generate a file first, then open the output folder.",
     },
     "中文": {
-        "window_title": "ARXML 文件选择器",
-        "title": "ARXML 转 Markdown",
-        "subtitle": "选择 ARXML 文件并生成可直接用于 markmap 的 Markdown 大纲。",
+        "window_title": "ARXML/DBC 文件选择器",
+        "title": "ARXML/DBC 转 Markdown",
+        "subtitle": "选择 ARXML 或 DBC 文件并生成可直接用于 markmap 的 Markdown 大纲。",
         "language_label": "语言：",
         "preview_title": "文件预览",
         "input_file_label": "输入文件：",
         "output_file_label": "输出文件：",
-        "arxml_path_label": "ARXML 文件路径：",
+        "arxml_path_label": "ARXML/DBC 文件路径：",
         "output_path_label": "输出 Markdown 路径：",
         "browse": "浏览...",
         "choose_output": "浏览...",
         "generate": "生成",
         "open_output": "打开输出文件夹",
-        "browse_title": "选择 ARXML 文件",
+        "browse_title": "选择 ARXML 或 DBC 文件",
         "save_title": "选择输出 Markdown 文件",
         "arxml_files": "ARXML 文件",
+        "dbc_files": "DBC 文件",
+        "supported_files": "支持的文件",
         "markdown_files": "Markdown 文件",
         "all_files": "所有文件",
         "file_selected": "已选择文件，点击生成即可生成 Markdown。",
-        "select_first": "请先选择 ARXML 文件。",
+        "select_first": "请先选择 ARXML 或 DBC 文件。",
         "input_missing": "输入文件不存在。",
-        "parse_failed": "ARXML 解析失败，请检查文件格式。",
-        "no_nodes": "未在 ARXML 中找到可提取的层级节点，无法生成 Markdown。",
+        "parse_failed": "输入文件解析失败，请检查文件格式。",
+        "unsupported_format": "不支持的文件格式，请选择 .arxml 或 .dbc 文件。",
+        "no_nodes": "未在输入文件中找到可提取的层级节点，无法生成 Markdown。",
         "read_write_error": "文件读写失败：{error}",
         "success": "Markdown 生成成功。",
         "open_output_missing": "请先生成文件，再打开输出文件夹。",
@@ -290,7 +296,12 @@ class ArxmlPickerUI:
     def browse_file(self) -> None:
         selected_path = filedialog.askopenfilename(
             title=self.tr("browse_title"),
-            filetypes=[(self.tr("arxml_files"), "*.arxml"), (self.tr("all_files"), "*.*")],
+            filetypes=[
+                (self.tr("supported_files"), "*.arxml *.dbc"),
+                (self.tr("arxml_files"), "*.arxml"),
+                (self.tr("dbc_files"), "*.dbc"),
+                (self.tr("all_files"), "*.*"),
+            ],
         )
         if not selected_path:
             return
@@ -332,14 +343,17 @@ class ArxmlPickerUI:
         output_path = Path(output_raw) if output_raw else input_path.with_suffix(".md")
 
         try:
-            arxml_to_markdown(input_path, output_path)
+            input_to_markdown(input_path, output_path)
         except FileNotFoundError:
             self.set_status("input_missing")
+            return
+        except UnsupportedInputFormatError:
+            self.set_status("unsupported_format")
             return
         except ExpatError:
             self.set_status("parse_failed")
             return
-        except ValueError as exc:
+        except NoExtractableNodesError:
             self.set_status("no_nodes")
             return
         except OSError as exc:
